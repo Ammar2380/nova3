@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0">
+    <title>NOVA — Not Your Normal Eyewear</title>
+    <meta name="description" content="Statement eyewear from Pakistan. Cash on delivery, nationwide shipping, 7-day exchange. Order via WhatsApp.">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- GSAP & Lenis for Premium Motion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'nova-void': '#0B0A08',
+                        'nova-ink': '#050403',
+                        'nova-card': '#141210',
+                        'nova-lime': '#C9FF3D',
+                        'nova-paper': '#F3EEE4',
+                        'nova-sand': '#D9CEB8',
+                        'nova-muted': '#8C8577',
+                    },
+                    fontFamily: {
+                        display: ['Syne', 'sans-serif'],
+                        editorial: ['Italiana', 'serif'],
+                        sans: ['Space Grotesk', 'sans-serif'],
+                    },
+                    letterSpacing: {
+                        tightest: '-.075em',
+                        tighter: '-.05em',
+                        tight: '-.025em',
+                        wide: '.025em',
+                        wider: '.05em',
+                        widest: '.1em',
+                        widest_xl: '.28em',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html, body {
+            background-color: #0B0A08;
+            color: #F3EEE4;
+            overflow-x: hidden;
+            width: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Lenis */
+        html.lenis { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        .lenis.lenis-scrolling iframe { pointer-events: none; }
+
+        /* Fine grain texture overlay — keeps flat colour fields from feeling like flat AI vector fills */
+        .grain::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            z-index: 5;
+        }
+
+        .text-outline {
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(243, 238, 228, 0.4);
+            transition: all 0.4s ease;
+        }
+        .text-outline:hover {
+            color: #C9FF3D;
+            -webkit-text-stroke: 1px #C9FF3D;
+        }
+
+        .glass-nav {
+            background: rgba(11, 10, 8, 0.72);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(243, 238, 228, 0.06);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease;
+        }
+        .nav-hidden { transform: translateY(-100%); }
+
+        #mobile-menu { transition: opacity 0.4s ease, visibility 0.4s ease; }
+        #mobile-menu.menu-active { opacity: 1; visibility: visible; }
+
+        /* Magazine spine label */
+        .spine-label {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+
+        /* Garment tag — the recurring NOVA signature device.
+           Reads like a swing-tag pinned to a frame: a punched hole + stitch edge. */
+        .nova-tag {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #C9FF3D;
+            color: #0B0A08;
+            font-weight: 700;
+            box-shadow: 0 12px 24px -8px rgba(0,0,0,0.5);
+        }
+        .nova-tag::before {
+            content: '';
+            position: absolute;
+            left: 0.55rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #0B0A08;
+            box-shadow: 0 0 0 2px rgba(11,10,8,0.15);
+        }
+        .nova-tag--pad { padding: 0.55rem 1rem 0.55rem 1.75rem; }
+
+        /* Dashed "stitched" frame used around bleed imagery */
+        .stitch-frame {
+            position: relative;
+        }
+        .stitch-frame::after {
+            content: '';
+            position: absolute;
+            inset: 10px;
+            border: 1px dashed rgba(243, 238, 228, 0.35);
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        /* Garment-tag style trust chip */
+        .care-chip {
+            position: relative;
+            border: 1px dashed rgba(243, 238, 228, 0.28);
+            padding: 0.6rem 0.9rem 0.6rem 1.6rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .care-chip::before {
+            content: '';
+            position: absolute;
+            left: 0.65rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            border: 1px solid rgba(243, 238, 228, 0.5);
+        }
+        .care-chip--dark {
+            border-color: rgba(11,10,8,0.25);
+        }
+        .care-chip--dark::before { border-color: rgba(11,10,8,0.45); }
+
+        .product-image-wrapper { overflow: hidden; position: relative; width: 100%; }
+        .img-primary, .img-secondary {
+            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+            will-change: transform, opacity;
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .img-secondary { position: absolute; top: 0; left: 0; opacity: 0; transform: scale(1.04); }
+        @media (hover: hover) {
+            .product-card:hover .img-primary { opacity: 0; transform: scale(0.96); }
+            .product-card:hover .img-secondary { opacity: 1; transform: scale(1); }
+        }
+
+        .cta-button {
+            position: relative; overflow: hidden; min-height: 48px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .cta-button::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background-color: #C9FF3D; transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: -1;
+        }
+        @media (hover: hover) {
+            .cta-button:hover::after { transform: translateY(0); }
+            .cta-button:hover { color: #0B0A08; border-color: #C9FF3D; }
+        }
+
+        .marquee-container { display: flex; white-space: nowrap; overflow: hidden; width: 100%; }
+        .marquee-content { display: flex; animation: marquee 24s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .spin-slow { animation: spin 14s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        @media (prefers-reduced-motion: reduce) {
+            .spin-slow, .marquee-content { animation: none; }
+        }
+    </style>
+</head>
+<body class="selection:bg-nova-lime selection:text-nova-void">
+
+    <!-- 1. NAVIGATION -->
+    <header id="navbar" class="fixed top-0 left-0 w-full z-50 glass-nav">
+        <div class="max-w-[1700px] mx-auto px-4 sm:px-6 md:px-12 h-20 md:h-24 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-2 md:gap-3 group relative z-[60]">
+                <svg class="w-8 h-8 md:w-10 md:h-10 fill-current text-nova-paper group-hover:text-nova-lime transition-colors duration-500" viewBox="0 0 24 24">
+                    <path d="M2,9C2,7.9 2.9,7 4,7H8C9.1,7 10,7.9 10,9V11C10,12.1 9.1,13 8,13H4C2.9,13 2,12.1 2,11V9M14,9C14,7.9 14.9,7 16,7H20C21.1,7 22,7.9 22,9V11C22,12.1 21.1,13 20,13H16C14.9,13 14,12.1 14,11V9M10,10H14V11H10V10Z"/>
+                </svg>
+                <span class="font-display font-bold text-xl md:text-2xl tracking-tighter uppercase mt-1">NOVA</span>
+            </a>
+
+            <nav class="hidden lg:flex items-center gap-12 font-sans font-medium text-[11px] tracking-widest_xl uppercase">
+                <a href="#collection" class="hover:text-nova-lime transition-colors relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-0 after:h-[1px] after:bg-nova-lime hover:after:w-full after:transition-all after:duration-300">The Drops</a>
+                <a href="#manifesto" class="hover:text-nova-lime transition-colors relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-0 after:h-[1px] after:bg-nova-lime hover:after:w-full after:transition-all after:duration-300">Manifesto</a>
+                <a href="#community" class="hover:text-nova-lime transition-colors relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-0 after:h-[1px] after:bg-nova-lime hover:after:w-full after:transition-all after:duration-300">Cult</a>
+            </nav>
+
+            <div class="flex items-center gap-4 md:gap-6 z-[60]">
+                <a href="https://wa.me/message/YBTWXLNI67RAL1" target="_blank" class="hidden md:inline-flex items-center justify-center px-6 min-h-[44px] border border-nova-paper/20 rounded-full font-sans font-semibold text-[10px] tracking-widest_xl uppercase hover:border-nova-lime hover:bg-nova-lime hover:text-nova-void transition-all duration-300">
+                    Order WhatsApp
+                </a>
+                <button id="mobile-menu-btn" aria-label="Toggle Menu" class="lg:hidden p-2 -mr-2 text-nova-paper focus:outline-none z-[60]">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path id="menu-icon-path" stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M4 7h16M4 12h16M4 17h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="fixed inset-0 bg-nova-void/95 backdrop-blur-xl z-50 opacity-0 invisible flex flex-col justify-center px-8">
+            <nav class="flex flex-col gap-8 font-display font-bold text-4xl uppercase tracking-tighter">
+                <a href="#collection" class="mobile-link hover:text-nova-lime transition-colors">The Drops</a>
+                <a href="#manifesto" class="mobile-link hover:text-nova-lime transition-colors">Manifesto</a>
+                <a href="#community" class="mobile-link hover:text-nova-lime transition-colors">Cult</a>
+                <a href="https://wa.me/message/YBTWXLNI67RAL1" target="_blank" class="mobile-link text-nova-lime mt-4 text-2xl border-b border-nova-lime/30 pb-2 inline-block w-max">Order WhatsApp ↗</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 2. CINEMATIC ASYMMETRIC HERO -->
+    <section class="relative w-full min-h-[100svh] overflow-hidden bg-nova-void">
+
+        <!-- Magazine spine, desktop only -->
+        <div class="hidden lg:flex absolute left-7 top-0 h-full items-center z-30 pointer-events-none">
+            <span class="spine-label font-sans text-[10px] tracking-[0.4em] uppercase text-nova-paper/35">Pakistan · Season 26 · Not Your Normal Eyewear</span>
+        </div>
+
+        <div class="relative z-20 max-w-[1700px] mx-auto grid grid-cols-1 lg:grid-cols-12 lg:min-h-[100svh]">
+
+            <!-- Text block: pinned low, not centered -->
+            <div class="order-2 lg:order-1 lg:col-span-6 flex flex-col justify-end px-5 sm:px-8 lg:pl-24 lg:pr-10 pt-10 pb-12 lg:pb-20">
+                <div class="overflow-hidden mb-6 sm:mb-8 mt-20 lg:mt-0">
+                    <div class="inline-flex items-center gap-2 sm:gap-3 px-3 py-1.5 sm:px-4 sm:py-2 border border-nova-paper/15 rounded-full backdrop-blur-md bg-nova-paper/5" id="hero-badge">
+                        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-nova-lime animate-pulse"></span>
+                        <span class="font-sans text-[9px] sm:text-[10px] tracking-widest uppercase font-semibold text-nova-paper">Season 26 · Drop Live</span>
+                    </div>
+                </div>
+
+                <h1 class="font-display font-extrabold text-[clamp(3rem,9vw,6.5rem)] uppercase leading-[0.86] tracking-tighter">
+                    <div class="overflow-hidden"><span class="block translate-y-full hero-title-line">Not Your</span></div>
+                    <div class="overflow-hidden"><span class="block translate-y-full hero-title-line font-editorial italic font-normal text-nova-lime normal-case pl-1">Normal</span></div>
+                    <div class="overflow-hidden"><span class="block translate-y-full hero-title-line text-outline">Eyewear.</span></div>
+                </h1>
+
+                <div class="mt-8 sm:mt-10 overflow-hidden max-w-sm">
+                    <p class="font-sans text-xs sm:text-sm text-nova-paper/65 font-light leading-relaxed translate-y-full hero-desc">
+                        Architectural silhouettes, vintage-leaning details, priced for every day. Designed in Pakistan, shipped door to door, nationwide.
+                    </p>
+                </div>
+
+                <div class="mt-9 sm:mt-10 overflow-hidden">
+                    <div class="translate-y-full hero-cta flex flex-col sm:flex-row gap-4 sm:items-center">
+                        <a href="#collection" class="group flex items-center justify-center gap-4 bg-nova-paper text-nova-void px-8 min-h-[48px] w-full sm:w-auto rounded-full font-sans font-bold text-[10px] sm:text-[11px] tracking-widest uppercase hover:bg-nova-lime transition-colors duration-500">
+                            Explore Collection
+                            <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        </a>
+                        <a href="https://wa.me/message/YBTWXLNI67RAL1" target="_blank" class="font-sans text-[11px] tracking-widest uppercase text-nova-paper/70 hover:text-nova-lime transition-colors underline decoration-nova-paper/20 underline-offset-4">
+                            Order on WhatsApp ↗
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Trust, as garment tags rather than feature cards -->
+                <div class="mt-10 sm:mt-12 flex flex-wrap gap-2.5 sm:gap-3 font-sans text-[9px] sm:text-[10px] tracking-widest uppercase text-nova-paper/70">
+                    <span class="care-chip">Cash on Delivery</span>
+                    <span class="care-chip">Pakistan-Wide Shipping</span>
+                    <span class="care-chip">7-Day Exchange</span>
+                </div>
+            </div>
+
+            <!-- Image block: full bleed, offset, tagged -->
+            <div class="order-1 lg:order-2 lg:col-span-6 relative aspect-[4/5] sm:aspect-[16/10] lg:aspect-auto lg:h-[100svh]">
+                <div class="absolute inset-0 stitch-frame grain">
+                    <div class="absolute inset-0 bg-gradient-to-t from-nova-void via-transparent to-nova-void/30 z-[7]"></div>
+                    <div class="absolute inset-0 bg-nova-void/10 z-[4]"></div>
+                    <img src="https://images.unsplash.com/photo-1614715838608-dd527c46231d?q=80&w=2000&auto=format&fit=crop" class="w-full h-full object-cover object-center scale-105" id="hero-bg" alt="NOVA eyewear campaign — model wearing NOVA frames">
+                </div>
+                <!-- Signature tag pinned across the seam between image and text -->
+                <div class="absolute -bottom-5 left-6 sm:left-10 lg:-left-8 z-30 -rotate-6">
+                    <div class="nova-tag nova-tag--pad font-sans text-[10px] sm:text-[11px] tracking-widest uppercase">
+                        N° 26 — Karachi Studio
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hidden sm:flex absolute bottom-8 right-6 lg:right-10 z-20 flex-col items-center gap-2 opacity-50">
+            <span class="font-sans text-[9px] uppercase tracking-widest">Scroll</span>
+            <div class="w-[1px] h-10 md:h-12 bg-nova-paper/30 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-nova-lime origin-top scroll-line"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. TRUST MARQUEE -->
+    <div class="w-full bg-nova-lime text-nova-void py-3 sm:py-4 border-y border-nova-lime/20 relative z-30">
+        <div class="marquee-container font-sans font-bold text-[10px] sm:text-xs md:text-sm uppercase tracking-widest">
+            <div class="marquee-content flex gap-8 sm:gap-12 items-center">
+                <span>✦ Cash on Delivery Available</span>
+                <span>✦ Nationwide Shipping Across Pakistan</span>
+                <span>✦ Easy 7-Day Exchange</span>
+                <span>✦ Premium Everyday Silhouettes</span>
+                <span>✦ Order via WhatsApp</span>
+                <span>✦ Cash on Delivery Available</span>
+                <span>✦ Nationwide Shipping Across Pakistan</span>
+                <span>✦ Easy 7-Day Exchange</span>
+                <span>✦ Premium Everyday Silhouettes</span>
+                <span>✦ Order via WhatsApp</span>
+                <span>✦ Cash on Delivery Available</span>
+                <span>✦ Nationwide Shipping Across Pakistan</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. EDITORIAL PRODUCT SHOWCASE -->
+    <section id="collection" class="py-20 md:py-32 w-full max-w-[1700px] mx-auto px-4 sm:px-6 md:px-12 overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-14 lg:mb-24 gap-6 lg:gap-8 section-header">
+            <div>
+                <span class="font-sans text-[10px] text-nova-lime tracking-widest_xl uppercase block mb-3 md:mb-4">The Collection</span>
+                <h2 class="font-display text-[clamp(2.5rem,7vw,4.5rem)] font-extrabold uppercase tracking-tight leading-[0.9]">
+                    Current <br class="hidden sm:block"><span class="font-editorial italic font-normal text-nova-muted normal-case">Drops.</span>
+                </h2>
+            </div>
+            <p class="font-sans text-xs sm:text-sm text-nova-paper/60 max-w-md font-light leading-relaxed lg:mb-2">
+                Hand-picked statement frames for modern street culture. Limited inventory per drop, restocks are never guaranteed.
+            </p>
+        </div>
+
+        <!-- Look 01 — hero product, bled upward and off-grid -->
+        <div class="relative product-row mb-16 md:mb-28 lg:mb-32">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-start">
+                <div class="lg:col-span-7 relative product-card">
+                    <span class="absolute top-0 left-0 z-20 -translate-x-2 -translate-y-3 sm:-translate-y-4 font-editorial italic text-nova-paper/15 text-[7rem] sm:text-[9rem] leading-none select-none pointer-events-none">01</span>
+                    <div class="relative aspect-[4/5] sm:aspect-[16/10] product-image-wrapper lg:-mt-10">
+                        <span class="absolute top-4 left-4 md:top-6 md:left-6 z-20 px-3 py-1.5 bg-nova-lime text-nova-void font-sans font-bold text-[9px] uppercase tracking-widest">Bestseller</span>
+                        <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=1400&auto=format&fit=crop" class="img-primary grayscale opacity-80" alt="Diamond Oval Slim frame, silver metallic rim">
+                        <img src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1400&auto=format&fit=crop" class="img-secondary" alt="Model wearing the Diamond Oval Slim">
+                    </div>
+                    <div class="absolute -bottom-6 right-6 sm:right-10 z-30 rotate-3">
+                        <div class="nova-tag nova-tag--pad font-sans text-[10px] sm:text-[11px] tracking-widest uppercase">Rs. 1,800</div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 lg:pl-10 pt-4 lg:pt-24 flex flex-col">
+                    <h3 class="font-display text-[clamp(2rem,4.5vw,3rem)] font-extrabold uppercase mb-4 tracking-tighter leading-none">Diamond <br class="hidden lg:block">Oval Slim</h3>
+                    <p class="font-sans text-xs md:text-sm text-nova-paper/60 leading-relaxed mb-8 max-w-sm">
+                        Our flagship silhouette. Silver metallic rim with intricate diamond hardware on the temples, engineered for a featherlight fit and undeniable presence.
+                    </p>
+                    <ul class="space-y-2.5 md:space-y-3 font-sans text-[10px] md:text-xs tracking-wider uppercase text-nova-paper/80 mb-10 border-l border-nova-paper/20 pl-5">
+                        <li><span class="text-nova-lime mr-2">/</span> Silver Alloy Frame</li>
+                        <li><span class="text-nova-lime mr-2">/</span> Slim Vintage Profile</li>
+                        <li><span class="text-nova-lime mr-2">/</span> UV400 Protection</li>
+                    </ul>
+                    <a href="https://wa.me/message/YBTWXLNI67RAL1" target="_blank" class="w-full sm:w-max px-8 border border-nova-paper/20 text-center font-sans font-bold text-[10px] md:text-[11px] tracking-widest uppercase cta-button z-10 transition-colors">
+                        Claim This Pair
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Look 02 & 03 — deliberately mismatched compositions, no repeated rectangles -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-stretch">
+
+            <!-- Look 02: tall portrait, caption burned into the image -->
+            <div class="lg:col-span-5 product-card group relative">
+                <span class="absolute top-0 right-0 z-20 translate-x-1 -translate-y-3 sm:-translate-y-4 font-editorial italic text-nova-paper/15 text-[6rem] sm:text-[7.5rem] leading-none select-none pointer-events-none">02</span>
+                <div class="relative aspect-[3/4] product-image-wrapper">
+                    <span class="absolute top-4 left-4 md:top-6 md:left-6 z-20 px-3 py-1.5 bg-nova-paper text-nova-void font-sans font-bold text-[9px] uppercase tracking-widest">Trending</span>
+                    <img src="https://images.unsplash.com/photo-1508296695146-257a814070b4?q=80&w=1200&auto=format&fit=crop" class="img-primary grayscale opacity-80" alt="Oval Leopard Slim frame, tortoiseshell acetate">
+                    <img src="https://images.unsplash.com/photo-1577803645773-f96470509666?q=80&w=1200&auto=format&fit=crop" class="img-secondary" alt="Model wearing Oval Leopard">
+                    <div class="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-nova-void via-nova-void/60 to-transparent pt-16 pb-5 px-5">
+                        <div class="flex items-end justify-between gap-3">
+                            <div>
+                                <h3 class="font-display text-xl md:text-2xl font-bold uppercase tracking-tight leading-none mb-1">Oval Leopard</h3>
+                                <p class="font-sans text-[10px] md:text-[11px] text-nova-paper/60 leading-relaxed max-w-[220px]">Vintage tortoiseshell, dark tinted lenses.</p>
+                            </div>
+                            <span class="font-sans text-base md:text-lg font-bold text-nova-lime shrink-0">Rs. 1,600</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="https://wa.me/message/YBTWXLNI67RAL1" target="_blank" class="mt-4 w-full border border-nova-paper/20 text-center font-sans font-bold text-[9px] md:text-[10px] tracking-widest uppercase cta-button z-10 transition-colors py-3">
+                    Add to Rotation
+                </a>
+            </div>
+
+            <!-- Look 03: wide strip, image + text side by side -->
+            <div class="lg:col-span-7 product-card group relative bg-nova-card border border-nova-paper/10 flex flex-col sm:flex-row lg:mt-16">
+                <div class="relative aspect-square sm:aspect-auto sm:w-1/2 product-image-wrapper">
+                    <span class="absolute top-4 left-4 md:top-6 md:left-6 z-20 px-3 py-1.5 bg-nova-lime text-nova-void font-sans font-bold text-[9px] uppercase tracking-widest">Limited Drop</span>
+                    <img src="https://images.unsplash.com/photo-1572635148619-a66d0ddbc9bc?q=80&w=1200&auto=format&fit=crop" class="img-primary grayscale opacity-80" alt="Rimless Tint frame, gradient lenses">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1200&auto=format&fit=crop" class="img-secondary" alt="Model wearing Rimless Tint">
+                </div>
+                <div class="p-6 sm:p-8 md:p-10 flex flex-col justify-between sm:w-1/2">
+                    <div>
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <h3 class="font-display text-xl md:text-2xl font-bold uppercase tracking-tight leading-none">Rimless <br>Tint</h3>
+                            <span class="font-sans text-base md:text-lg font-bold text-nova-lime shrink-0">Rs. 1,800</span>
+                        </div>
+                        <p class="font-sans text-[11px] md:text-xs text-nova-paper/60 leading-relaxed mb-8">Ultra-lightweight rimless architecture with a gradient tint. Maximum impact, zero weight on the nose.</p>
+                    </div>
+                    <a href="https://wa.me/message/YBTWXLNI67RAL1" target="_blank" class="w-full border border-nova-paper/20 text-center font-sans font-bold text-[9px] md:text-[10px] tracking-widest uppercase cta-button z-10 transition-colors py-3">
+                        Add to Rotation
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editorial pull-quote break -->
+        <div class="mt-24 md:mt-36 border-t border-b border-nova-paper/10 py-12 md:py-16 text-center section-header">
+            <p class="font-editorial italic text-[clamp(1.5rem,4.5vw,2.75rem)] font-normal leading-tight max-w-3xl mx-auto text-nova-paper/90">
+                "Frames aren't just accessories — they're the architecture of your face."
+            </p>
+        </div>
+    </section>
+
+    <!-- 5. MANIFESTO -->
+    <section id="manifesto" class="relative py-20 md:py-32 bg-nova-paper text-nova-void overflow-hidden">
+        <div class="max-w-[1700px] mx-auto px-4 sm:px-6 md:px-12 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-16 items-center">
+
+                <div class="lg:col-span-7">
+                    <span class="font-sans text-[9px] md:text-[10px] text-nova-void/60 tracking-widest_xl uppercase block mb-6 md:mb-8 font-bold border-b border-nova-void/20 inline-block pb-2">The Philosophy</span>
+                    <h2 class="font-display text-[clamp(2.5rem,7vw,4.5rem)] font-extrabold uppercase leading-[0.85] tracking-tighter mb-8 md:mb-10">
+                        Average Is <br class="hidden sm:block">
+                        <span class="font-editorial italic font-normal text-nova-muted normal-case">The Enemy.</span>
+                    </h2>
+
+                    <div class="space-y-4 md:space-y-6 font-sans text-sm md:text-base lg:text-lg text-nova-void/80 font-medium leading-relaxed max-w-xl">
+                        <p>
+                            Founded by <a href="https://instagram.com/sehh_.rizzz" class="underline decoration-2 decoration-nova-void hover:text-nova-void/60 transition-colors">@sehh_.rizzz</a> &amp; <a href="https://instagram.com/_ahmedsaqib" class="underline decoration-2 decoration-nova-void hover:text-nova-void/60 transition-colors">@_ahmedsaqib</a>, NOVA was built to disrupt the repetitive, mass-market eyewear scene in Pakistan.
+                        </p>
+                        <p>
+                            We believe frames aren't just accessories — they're the architecture of your face. Every piece is curated for silhouette, character, and statement value, priced so a new look is never out of reach.
+                        </p>
+                    </div>
+
+                    <div class="mt-10 md:mt-14 flex flex-wrap gap-2.5 sm:gap-3 font-sans text-[9px] sm:text-[10px] tracking-widest uppercase text-nova-void/70">
+                        <span class="care-chip care-chip--dark">Premium Quality, Guaranteed</span>
+                        <span class="care-chip care-chip--dark">7-Day Hassle-Free Swap</span>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 relative w-full aspect-[4/5] sm:aspect-square md:aspect-[16/9] lg:aspect-[4/5] mx-auto max-w-[500px] lg:max-w-none">
+                    <div class="absolute inset-0 bg-nova-void p-1.5 md:p-2 overflow-hidden shadow-2xl transform lg:rotate-3">
+                        <img src="https://images.unsplash.com/photo-1509695507497-903c140c43b0?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover filter grayscale contrast-125 hover:scale-105 transition-transform duration-1000" alt="NOVA brand mood — studio still life">
+                    </div>
+                    <div class="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 md:-bottom-8 md:-left-8 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-nova-lime rounded-full flex items-center justify-center p-2 shadow-2xl spin-slow z-20 text-nova-void">
+                        <svg viewBox="0 0 100 100" class="w-full h-full">
+                            <path id="curve" fill="transparent" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                            <text class="font-sans text-[10px] md:text-[11px] font-bold uppercase tracking-widest fill-current">
+                                <textPath href="#curve">Original Design • Pk Shipping •</textPath>
+                            </text>
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. HIGH CONVERSION CTA & FOOTER -->
+    <section id="community" class="relative bg-nova-void border-t border-nova-paper/10 pt-24 pb-8 md:pt-32 md:pb-12 flex flex-col items-center justify-center overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[90vw] md:w-[80vw] md:h-[80vw] max-w-[800px] max-h-[800px] bg-nova-lime/10 rounded-full blur-[80px] md:blur-[100px] pointer-events-none"></div>
+
+        <div class="relative z-10 w-full max-w-[1700px] mx-auto px-4 sm:px-6 text-center mb-16 md:mb-24">
+            <h2 class="font-display text-[clamp(3rem,11vw,7.5rem)] font-extrabold uppercase leading-[0.8] tracking-tighter mb-6 md:mb-8 hover:text-nova-lime transition-colors duration-500 cursor-default">
+                Secure Your <br>
+                <span class="text-outline">Rotation.</span>
+            </h2>
+            <p class="font-sans text-xs sm:text-sm md:text-base text-nova-paper/60 max-w-[90vw] sm:max-w-md mx-auto mb-8 md:mb-10 leading-relaxed">
+                DM us on Instagram or message on WhatsApp to place your order. Cash on delivery, nationwide.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4 sm:px-0 mb-10 md:mb-12">
+                <a href="https://wa.me/message/YBTWXLNI67RAL1" target="_blank" class="w-full sm:w-auto px-8 min-h-[48px] bg-nova-lime text-nova-void font-sans font-bold text-[10px] md:text-[11px] uppercase tracking-widest_xl hover:bg-nova-paper transition-colors duration-300 flex items-center justify-center">
+                    Order via WhatsApp
+                </a>
+                <a href="https://instagram.com/novaa.pk" target="_blank" class="w-full sm:w-auto px-8 min-h-[48px] border border-nova-paper/20 text-nova-paper font-sans font-bold text-[10px] md:text-[11px] uppercase tracking-widest_xl hover:border-nova-paper transition-colors duration-300 flex items-center justify-center">
+                    Visit Instagram
+                </a>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 font-sans text-[9px] sm:text-[10px] tracking-widest uppercase text-nova-paper/60">
+                <span class="care-chip">Cash on Delivery</span>
+                <span class="care-chip">Pakistan-Wide Shipping</span>
+                <span class="care-chip">7-Day Exchange</span>
+            </div>
+        </div>
+
+        <div class="w-full max-w-[1700px] mx-auto px-4 sm:px-6 border-t border-nova-paper/10 pt-6 md:pt-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 z-10 font-sans text-[9px] md:text-[10px] tracking-widest uppercase text-nova-paper/40 text-center md:text-left">
+            <div class="flex items-center gap-2">
+                <span class="font-display font-bold text-base md:text-lg text-nova-paper tracking-tighter">NOVA</span>
+                <span>© 2026</span>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-8 items-center">
+                <span>Not Your Normal Eyewear</span>
+                <span class="sm:block">Hyderabad, Sindh, PK</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script>
+        // 1. Mobile Menu Toggle
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIconPath = document.getElementById('menu-icon-path');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+        let isMenuOpen = false;
+
+        function toggleMenu() {
+            isMenuOpen = !isMenuOpen;
+            if (isMenuOpen) {
+                mobileMenu.classList.add('menu-active');
+                menuIconPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+                document.body.style.overflow = 'hidden';
+            } else {
+                mobileMenu.classList.remove('menu-active');
+                menuIconPath.setAttribute('d', 'M4 7h16M4 12h16M4 17h16');
+                document.body.style.overflow = '';
+            }
+        }
+        menuBtn.addEventListener('click', toggleMenu);
+        mobileLinks.forEach(link => link.addEventListener('click', () => { if (isMenuOpen) toggleMenu(); }));
+
+        // 2. Lenis smooth scroll
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        // 3. Navbar hide/show on scroll
+        let lastScrollY = window.scrollY;
+        const navbar = document.getElementById('navbar');
+        lenis.on('scroll', (e) => {
+            if (isMenuOpen) return;
+            if (window.scrollY > 100) {
+                if (window.scrollY > lastScrollY) {
+                    navbar.classList.add('nav-hidden');
+                } else {
+                    navbar.classList.remove('nav-hidden');
+                    navbar.style.background = 'rgba(11, 10, 8, 0.9)';
+                }
+            } else {
+                navbar.classList.remove('nav-hidden');
+                navbar.style.background = 'rgba(11, 10, 8, 0.72)';
+            }
+            lastScrollY = window.scrollY;
+        });
+
+        // 4. GSAP animation
+        gsap.registerPlugin(ScrollTrigger);
+        let mm = gsap.matchMedia();
+
+        const heroTl = gsap.timeline();
+        heroTl.fromTo(".scroll-line", { scaleY: 0 }, { scaleY: 1, duration: 1.5, ease: "power3.inOut", repeat: -1, transformOrigin: "top" });
+        heroTl.to("#hero-badge", { y: 0, opacity: 1, duration: 1, ease: "power4.out" }, 0.2)
+              .to(".hero-title-line", { y: 0, duration: 1.2, stagger: 0.15, ease: "power4.out" }, 0.4)
+              .to(".hero-desc", { y: 0, opacity: 1, duration: 1, ease: "power4.out" }, 0.8)
+              .to(".hero-cta", { y: 0, opacity: 1, duration: 1, ease: "power4.out" }, 1.0);
+
+        mm.add("(min-width: 768px)", () => {
+            gsap.to("#hero-bg", {
+                yPercent: 15,
+                ease: "none",
+                scrollTrigger: { trigger: "#hero-bg", start: "top top", end: "bottom top", scrub: true }
+            });
+        });
+
+        const fadeElements = document.querySelectorAll('.section-header, .product-row, .product-card');
+        fadeElements.forEach((el) => {
+            gsap.fromTo(el, { y: 40, opacity: 0 }, {
+                y: 0, opacity: 1, duration: 0.8, ease: "power3.out",
+                scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" }
+            });
+        });
+    </script>
+</body>
+</html>
